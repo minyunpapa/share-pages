@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>마이니 타이머 4 (minee 4) 컬러 셀렉터</title>
+  <meta name="description" content="우리 가족 마이니 4 타이머 색상 고르기">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --primary: #3b82f6;
+      --border: #e2e8f0;
+      --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 120px;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      padding: 24px 0 16px;
+    }
+
+    .brand-badge {
+      display: inline-block;
+      background: #eff6ff;
+      color: #2563eb;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      border: 1px solid #dbeafe;
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      word-break: keep-all;
+    }
+
+    /* Selection Sticky Bar */
+    .selection-board {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 18px;
+      margin: 16px 0 28px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .board-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .picker-slots {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .slot {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 14px;
+      padding: 10px 8px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .slot.active {
+      background: #eff6ff;
+      border: 1.5px solid #3b82f6;
+    }
+
+    .slot-role {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .slot-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .slot.empty .slot-val {
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .copy-btn {
+      width: 100%;
+      background: #1e293b;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: #0f172a;
+    }
+
+    .copy-btn.copied {
+      background: #10b981;
+    }
+
+    /* Color Cards List */
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .color-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+
+    .color-card:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-img-wrap {
+      width: 100%;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      min-height: 280px;
+    }
+
+    .card-img {
+      max-width: 240px;
+      max-height: 240px;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.12));
+      transition: transform 0.25s ease;
+    }
+
+    .card-img:hover {
+      transform: scale(1.04);
+    }
+
+    .tag-badge {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .tag-badge.dad {
+      background: #1e3a8a;
+    }
+
+    .tag-badge.hamin {
+      background: #0369a1;
+    }
+
+    .tag-badge.hayun {
+      background: #86198f;
+    }
+
+    .tag-badge.sig {
+      background: #047857;
+    }
+
+    .card-body {
+      padding: 20px 18px 22px;
+    }
+
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+
+    .color-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .color-eng {
+      font-size: 13px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .color-desc {
+      font-size: 14px;
+      color: #475569;
+      margin-bottom: 16px;
+      line-height: 1.45;
+      word-break: keep-all;
+    }
+
+    .btn-group {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .pick-btn {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 9px 4px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+
+    .pick-btn:hover {
+      background: #e2e8f0;
+      border-color: #94a3b8;
+    }
+
+    .pick-btn.selected {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #1d4ed8;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+    }
+
+    /* Specs info */
+    .specs-box {
+      margin-top: 36px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 20px;
+    }
+
+    .specs-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 12px;
+    }
+
+    .specs-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .specs-item {
+      font-size: 13px;
+      color: #475569;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      line-height: 1.4;
+    }
+
+    .specs-icon {
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #0f172a;
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28), opacity 0.3s;
+      opacity: 0;
+      z-index: 999;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="brand-badge">mineetimer 4 · official colorway</div>
+      <h1>마이니 타이머 4 컬러 셀렉터</h1>
+      <p class="subtitle">우리 가족 3대 구매 색상 선택! 마음에 드는 색상을 버튼을 눌러 골라보세요.</p>
+    </header>
+
+    <!-- Selection Dashboard -->
+    <div class="selection-board">
+      <div class="board-title">
+        <span>📋 우리 가족 선택 현황</span>
+      </div>
+      <div class="picker-slots">
+        <div class="slot empty" id="slot-dad">
+          <div class="slot-role">👨‍💻 아빠</div>
+          <div class="slot-val" id="val-dad">선택 전</div>
+        </div>
+        <div class="slot empty" id="slot-hamin">
+          <div class="slot-role">👦 하민 (중1)</div>
+          <div class="slot-val" id="val-hamin">선택 전</div>
+        </div>
+        <div class="slot empty" id="slot-hayun">
+          <div class="slot-role">👧 하윤 (초3)</div>
+          <div class="slot-val" id="val-hayun">선택 전</div>
+        </div>
+      </div>
+      <button class="copy-btn" id="copy-btn" onclick="copyResult()">
+        <span id="copy-text">선택 결과 카톡/메시지용 복사하기 📋</span>
+      </button>
+    </div>
+
+    <!-- Color Cards List -->
+    <div class="card-list">
+
+      <!-- 1. Silver Black -->
+      <div class="color-card">
+        <div class="card-img-wrap">
+          <div class="tag-badge dad">👨‍💻 아빠 데스크 추천 1순위</div>
+          <img src="./images/silver_black.png" alt="실버 블랙" class="card-img" loading="lazy">
+        </div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <h2 class="color-title">실버 블랙</h2>
+            <span class="color-eng">Silver Black</span>
+          </div>
+          <p class="color-desc">세련된 메탈릭 실버 테두리에 차분한 딥 블랙 페이스. 맥북·모니터·서재 데스크와 가장 완벽하게 어우러지는 모던 미니멀리즘 컬러입니다.</p>
+          <div class="btn-group">
+            <button class="pick-btn" onclick="selectColor('dad', '실버 블랙', this)">👨 아빠 선택</button>
+            <button class="pick-btn" onclick="selectColor('hamin', '실버 블랙', this)">👦 하민 선택</button>
+            <button class="pick-btn" onclick="selectColor('hayun', '실버 블랙', this)">👧 하윤 선택</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Midnight Blue -->
+      <div class="color-card">
+        <div class="card-img-wrap">
+          <div class="tag-badge hamin">👦 중1 하민 추천 1순위</div>
+          <img src="./images/midnight_blue.png" alt="미드나잇 블루" class="card-img" loading="lazy">
+        </div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <h2 class="color-title">미드나잇 블루</h2>
+            <span class="color-eng">Midnight Blue</span>
+          </div>
+          <p class="color-desc">깊은 밤하늘처럼 묵직하고 집중감을 높여주는 다크 네이비 톤. 남학생 방이나 스터디카페에서 질리지 않고 오래 쓰기 가장 좋은 베스트셀러입니다.</p>
+          <div class="btn-group">
+            <button class="pick-btn" onclick="selectColor('dad', '미드나잇 블루', this)">👨 아빠 선택</button>
+            <button class="pick-btn" onclick="selectColor('hamin', '미드나잇 블루', this)">👦 하민 선택</button>
+            <button class="pick-btn" onclick="selectColor('hayun', '미드나잇 블루', this)">👧 하윤 선택</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Lilac Snow -->
+      <div class="color-card">
+        <div class="card-img-wrap">
+          <div class="tag-badge hayun">👧 초3 하윤 추천 1순위</div>
+          <img src="./images/lilac_snow.png" alt="라일락 스노우" class="card-img" loading="lazy">
+        </div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <h2 class="color-title">라일락 스노우</h2>
+            <span class="color-eng">Lilac Snow</span>
+          </div>
+          <p class="color-desc">포근한 화이트 바디에 은은하고 화사한 라벤더·연보라빛 파스텔. 책상 분위기를 밝고 사랑스럽게 만들어주는 여학생 선호 1위 컬러입니다.</p>
+          <div class="btn-group">
+            <button class="pick-btn" onclick="selectColor('dad', '라일락 스노우', this)">👨 아빠 선택</button>
+            <button class="pick-btn" onclick="selectColor('hamin', '라일락 스노우', this)">👦 하민 선택</button>
+            <button class="pick-btn" onclick="selectColor('hayun', '라일락 스노우', this)">👧 하윤 선택</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Pastel Marine -->
+      <div class="color-card">
+        <div class="card-img-wrap">
+          <div class="tag-badge sig">✨ 마이니 4 시그니처</div>
+          <img src="./images/pastel_marine.png" alt="파스텔 마린" class="card-img" loading="lazy">
+        </div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <h2 class="color-title">파스텔 마린</h2>
+            <span class="color-eng">Pastel Marine</span>
+          </div>
+          <p class="color-desc">산뜻한 에메랄드 마린 블루와 크림톤의 청량한 조합. 공부할 때 눈이 시원해지고 기분까지 상쾌해지는 마이니 4세대 대표 색상입니다.</p>
+          <div class="btn-group">
+            <button class="pick-btn" onclick="selectColor('dad', '파스텔 마린', this)">👨 아빠 선택</button>
+            <button class="pick-btn" onclick="selectColor('hamin', '파스텔 마린', this)">👦 하민 선택</button>
+            <button class="pick-btn" onclick="selectColor('hayun', '파스텔 마린', this)">👧 하윤 선택</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Sea Green -->
+      <div class="color-card">
+        <div class="card-img-wrap">
+          <div class="tag-badge">🌿 편안한 세이지 그린</div>
+          <img src="./images/sea_green.png" alt="씨 그린" class="card-img" loading="lazy">
+        </div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <h2 class="color-title">씨 그린</h2>
+            <span class="color-eng">Sea Green</span>
+          </div>
+          <p class="color-desc">눈의 피로를 덜어주는 올리브 세이지 그린 톤. 차분하고 안정감 있는 색감으로 긴 호흡의 독서나 자습 시간에 평온한 집중력을 돕습니다.</p>
+          <div class="btn-group">
+            <button class="pick-btn" onclick="selectColor('dad', '씨 그린', this)">👨 아빠 선택</button>
+            <button class="pick-btn" onclick="selectColor('hamin', '씨 그린', this)">👦 하민 선택</button>
+            <button class="pick-btn" onclick="selectColor('hayun', '씨 그린', this)">👧 하윤 선택</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Cocoa Beige -->
+      <div class="color-card">
+        <div class="card-img-wrap">
+          <div class="tag-badge">☕ 따뜻한 라떼 웜톤</div>
+          <img src="./images/cocoa_beige.png" alt="코코아 베이지" class="card-img" loading="lazy">
+        </div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <h2 class="color-title">코코아 베이지</h2>
+            <span class="color-eng">Cocoa Beige</span>
+          </div>
+          <p class="color-desc">따스한 밀크티·코코아 느낌의 부드러운 뉴트럴 베이지. 원목 가구 책상이나 차분한 인테리어에 자연스럽게 녹아드는 포근한 무드입니다.</p>
+          <div class="btn-group">
+            <button class="pick-btn" onclick="selectColor('dad', '코코아 베이지', this)">👨 아빠 선택</button>
+            <button class="pick-btn" onclick="selectColor('hamin', '코코아 베이지', this)">👦 하민 선택</button>
+            <button class="pick-btn" onclick="selectColor('hayun', '코코아 베이지', this)">👧 하윤 선택</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Cherry Red -->
+      <div class="color-card">
+        <div class="card-img-wrap">
+          <div class="tag-badge">🍒 비비드 포인트</div>
+          <img src="./images/cherry_red.png" alt="체리 레드" class="card-img" loading="lazy">
+        </div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <h2 class="color-title">체리 레드</h2>
+            <span class="color-eng">Cherry Red</span>
+          </div>
+          <p class="color-desc">발랄하고 생기 넘치는 강렬한 체리 핑크빛 레드. 책상 위 확실한 활력을 더해주는 개성 만점 포인트 컬러입니다.</p>
+          <div class="btn-group">
+            <button class="pick-btn" onclick="selectColor('dad', '체리 레드', this)">👨 아빠 선택</button>
+            <button class="pick-btn" onclick="selectColor('hamin', '체리 레드', this)">👦 하민 선택</button>
+            <button class="pick-btn" onclick="selectColor('hayun', '체리 레드', this)">👧 하윤 선택</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Minee 4 Highlights -->
+    <div class="specs-box">
+      <div class="specs-title">✨ 마이니 타이머 4 주요 특징</div>
+      <ul class="specs-list">
+        <li class="specs-item">
+          <span class="specs-icon">🛡️</span>
+          <span><b>물리 기어 없는 100% 전자식</b>: 태엽이나 모터가 없어 아이들이 만져도 헛돌거나 고장 나지 않는 반영구 내구성</span>
+        </li>
+        <li class="specs-item">
+          <span class="specs-icon">⏱️</span>
+          <span><b>포모도로 인터벌 자동화</b>: 25분 집중 - 5분 휴식 루틴을 버튼 하나로 자동 반복</span>
+        </li>
+        <li class="specs-item">
+          <span class="specs-icon">📱</span>
+          <span><b>스마트폰 앱 연동 기록</b>: 각자 폰에 앱을 깔면 일간·주간 순공 시간이 깔끔한 그래프로 자동 누적 관리</span>
+        </li>
+        <li class="specs-item">
+          <span class="specs-icon">🤫</span>
+          <span><b>초저소음 / 독서실 모드</b>: 째깍거림 0% 무소음 및 무음·진동·LED 알람 지원</span>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast">복사되었습니다!</div>
+
+  <script>
+    const state = {
+      dad: '',
+      hamin: '',
+      hayun: ''
+    };
+
+    function selectColor(role, colorName, btn) {
+      state[role] = colorName;
+
+      // Update slot display
+      const slot = document.getElementById(`slot-${role}`);
+      const val = document.getElementById(`val-${role}`);
+      slot.classList.remove('empty');
+      slot.classList.add('active');
+      val.textContent = colorName;
+
+      // Update button active state
+      const roleBtns = document.querySelectorAll(`.pick-btn[onclick*="'${role}'"]`);
+      roleBtns.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+
+      showToast(`${roleName(role)}의 선택: ${colorName}`);
+    }
+
+    function roleName(role) {
+      if (role === 'dad') return '👨 아빠';
+      if (role === 'hamin') return '👦 하민';
+      return '👧 하윤';
+    }
+
+    function copyResult() {
+      const dadText = state.dad ? state.dad : '미선택';
+      const haminText = state.hamin ? state.hamin : '미선택';
+      const hayunText = state.hayun ? state.hayun : '미선택';
+
+      const resultText = `[마이니 4 색상 선택 결과]\n• 아빠: ${dadText}\n• 하민: ${haminText}\n• 하윤: ${hayunText}`;
+
+      navigator.clipboard.writeText(resultText).then(() => {
+        const btn = document.getElementById('copy-btn');
+        const text = document.getElementById('copy-text');
+        btn.classList.add('copied');
+        text.textContent = '클립보드에 복사 완료! ✅';
+        showToast('선택 결과가 복사되었습니다!');
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          text.textContent = '선택 결과 카톡/메시지용 복사하기 📋';
+        }, 2500);
+      }).catch(err => {
+        prompt('아래 텍스트를 복사하세요:', resultText);
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
