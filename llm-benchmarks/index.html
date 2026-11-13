@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>최신 프론티어 LLM 벤치마크 및 작업별 최적 모델 비교 가이드 (2026.11)</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --card-border: #30363d;
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --text-accent: #58a6ff;
+      --accent-green: #3fb950;
+      --accent-purple: #bc8cff;
+      --accent-orange: #d29922;
+      --accent-red: #f85149;
+      --tag-bg: #21262d;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      padding: 24px 16px;
+    }
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+    header {
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 20px;
+      background: rgba(88, 166, 255, 0.15);
+      color: var(--text-accent);
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+    .summary-box {
+      background: rgba(56, 139, 253, 0.08);
+      border: 1px solid rgba(56, 139, 253, 0.3);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 28px;
+      font-size: 14px;
+    }
+    .summary-box strong {
+      color: var(--text-accent);
+    }
+    h2 {
+      font-size: 20px;
+      margin: 32px 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-left: 4px solid var(--text-accent);
+      padding-left: 10px;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      margin-bottom: 28px;
+      background: var(--card-bg);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+      white-space: nowrap;
+    }
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    th {
+      background: #1c2128;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .model-name {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .provider-google { color: #8ab4f8; }
+    .provider-openai { color: #7ee787; }
+    .provider-anthropic { color: #d2a8ff; }
+    .tag {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 11px;
+      border-radius: 4px;
+      background: var(--tag-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--card-border);
+    }
+    .tag-green {
+      background: rgba(63, 185, 80, 0.15);
+      color: var(--accent-green);
+      border-color: rgba(63, 185, 80, 0.3);
+    }
+    .tag-purple {
+      background: rgba(188, 140, 255, 0.15);
+      color: var(--accent-purple);
+      border-color: rgba(188, 140, 255, 0.3);
+    }
+    .tag-orange {
+      background: rgba(210, 153, 34, 0.15);
+      color: var(--accent-orange);
+      border-color: rgba(210, 153, 34, 0.3);
+    }
+    .tag-red {
+      background: rgba(248, 81, 73, 0.15);
+      color: var(--accent-red);
+      border-color: rgba(248, 81, 73, 0.3);
+    }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .card-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 4px 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.07);
+    }
+    .metric-row:last-child {
+      border-bottom: none;
+    }
+    .metric-label {
+      color: var(--text-muted);
+    }
+    .metric-val {
+      font-weight: 600;
+    }
+    .use-case-box {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--card-border);
+      font-size: 13px;
+    }
+    .use-case-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .highlight-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .highlight-header {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .footer {
+      margin-top: 48px;
+      padding-top: 20px;
+      border-top: 1px solid var(--card-border);
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">LIVE BENCHMARKS · 2026.11 실측 기준</div>
+      <h1>최신 프론티어 LLM 벤치마크 & 작업별 최적 모델 비교 가이드</h1>
+      <p class="subtitle">Claude 5.5 (Sonnet·Opus) · GPT-6.1 (Sol·Terra) · Gemini 4 (Hydrogen·Argon·Carbon) 전수 분석</p>
+    </header>
+
+    <div class="summary-box">
+      <strong>💡 엔지니어링 핵심 요약</strong><br>
+      • <strong>CLI / 로컬 맥 제어 / 에이전트 셸 조작</strong>: <strong>Claude Sonnet 5.5</strong> (Terminal-Bench 70.6%, OSWorld 80.1% 독보적 1위)<br>
+      • <strong>초고난도 심층 추론 / 아키텍처 설계</strong>: <strong>Gemini 4 Carbon (High)</strong> (지능 지수 60) & <strong>Claude Opus 5.5 (Max)</strong> (지능 지수 59)<br>
+      • <strong>대규모 범용 코딩 & 비용 밸런스</strong>: <strong>GPT-6.1 Sol</strong> (Sonnet 5.5급 지능 55를 태스크당 $1.27로 1/8 비용에 수행)<br>
+      • <strong>초저지연 데이터 검색 / 환각 방지</strong>: <strong>Gemini 4 Hydrogen</strong> (AA-Omniscience 환각률 8% 압도적 1위, 최속 5.3분 완료)<br>
+      • <strong>경량 서브태스크 / 가성비 코드 보조</strong>: <strong>GPT-6.1 Terra</strong> ($1.00/$5.00 반값에 코딩 인덱스 76.3)
+    </div>
+
+    <h2>1. 전체 모델 벤치마크 & 단가 종합 매트릭스</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>모델명</th>
+            <th>추론 티어</th>
+            <th>AA 지능 지수</th>
+            <th>AW Index</th>
+            <th>LMArena Elo</th>
+            <th>입력 / 출력 (1M)</th>
+            <th>태스크당 평균 비용</th>
+            <th>추천 포지셔닝</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="model-name provider-google">Gemini 4 Carbon</span></td>
+            <td><span class="tag tag-purple">High</span></td>
+            <td><strong>60</strong> (전체 1위)</td>
+            <td><strong>94.1</strong></td>
+            <td>1,780+</td>
+            <td>$2.00 / $10.00 <span class="tag tag-orange">12/1 $4/$20 인상</span></td>
+            <td>$7.76</td>
+            <td>극강의 심층 추론, 복잡 알고리즘</td>
+          </tr>
+          <tr>
+            <td><span class="model-name provider-google">Gemini 4 Carbon</span></td>
+            <td><span class="tag tag-purple">Medium</span></td>
+            <td><strong>58</strong></td>
+            <td>94.1</td>
+            <td>1,760+</td>
+            <td>$2.00 / $10.00 <span class="tag tag-orange">12/1 $4/$20 인상</span></td>
+            <td>$6.59</td>
+            <td>고난도 분석, 장기 컨텍스트 추론</td>
+          </tr>
+          <tr>
+            <td><span class="model-name provider-anthropic">Claude Opus 5.5</span></td>
+            <td><span class="tag tag-purple">Max</span></td>
+            <td><strong>59</strong></td>
+            <td><strong>90.9</strong></td>
+            <td>1,780+</td>
+            <td>$4.00 / $20.00 (캐시 $0.20)</td>
+            <td>$10.04 (TTFT 340s+)</td>
+            <td>최종 의사결정, 비동기 배치 분석</td>
+          </tr>
+          <tr>
+            <td><span class="model-name provider-anthropic">Claude Opus 5.5</span></td>
+            <td><span class="tag tag-purple">High</span></td>
+            <td><strong>52~54</strong></td>
+            <td>90.9</td>
+            <td>1,750+</td>
+            <td>$4.00 / $20.00 (캐시 $0.20)</td>
+            <td>$3.46 (TTFT 24s)</td>
+            <td>고품질 지식 작업, 전문 문서 작성</td>
+          </tr>
+          <tr>
+            <td><span class="model-name provider-anthropic">Claude Opus 5.5</span></td>
+            <td><span class="tag tag-purple">Medium</span></td>
+            <td><strong>48~51</strong></td>
+            <td>90.9</td>
+            <td>1,730+</td>
+            <td>$4.00 / $20.00 (캐시 $0.20)</td>
+            <td>$1.34 (가성비 최적)</td>
+            <td>준실시간 고품질 리즈닝</td>
+          </tr>
+          <tr>
+            <td><span class="model-name provider-anthropic">Claude Sonnet 5.5</span></td>
+            <td><span class="tag tag-green">Max</span></td>
+            <td><strong>55</strong></td>
+            <td><strong>83.3</strong></td>
+            <td><strong>1,772.3</strong></td>
+            <td>$2.00 / $10.00 (캐시 $0.10)</td>
+            <td>$10.02</td>
+            <td><strong>터미널/CLI 조작, OS 제어 (1위)</strong></td>
+          </tr>
+          <tr>
+            <td><span class="model-name provider-anthropic">Claude Sonnet 5.5</span></td>
+            <td><span class="tag tag-green">High</span></td>
+            <td><strong>42</strong></td>
+            <td>83.3</td>
+            <td>1,740+</td>
+            <td>$2.00 / $10.00 (캐시 $0.10)</td>
+            <td>$1.64</td>
+            <td>에이전트 루프, 셸 도구 연동</td>
+          </tr>
+          <tr>
+            <td><span class="model-name provider-openai">GPT-6.1 Sol</span></td>
+            <td><span class="tag tag-green">Max</span></td>
+            <td><strong>55</strong></td>
+            <td><strong>81.8</strong></td>
+            <td><strong>1,743.3</strong></td>
+            <td>$2.00 / $10.00 (캐시 $0.10)</td>
+            <td>$1.27 (압도적 가성비)</td>
+            <td><strong>복합 추론 & 대규모 코드 분석</strong></td>
+          </tr>
+          <tr>
+            <td><span class="model-name provider-openai">GPT-6.1 Sol</span></td>
+            <td><span class="tag tag-green">High</span></td>
+            <td><strong>50</strong></td>
+            <td>81.8</td>
+            <td>1,720+</td>
+            <td>$2.00 / $10.00 (캐시 $0.10)</td>
+            <td>$0.59</td>
+            <td>상시 에이전트 작업, 리팩토링</td>
+          </tr>
+          <tr>
+            <td><span class="model-name provider-google">Gemini 4 Hydrogen</span></td>
+            <td><span class="tag tag-green">Xhigh</span></td>
+            <td><strong>54</strong></td>
+            <td><strong>81.9</strong></td>
+            <td><strong>1,704.2</strong></td>
+            <td>$1.50 / $7.50 (캐시 $0.075)</td>
+            <td>$3.16</td>
+            <td>초저환각(8%) 정밀 데이터 검색</td>
+          </tr>
+          <tr>
+            <td><span class="model-name provider-google">Gemini 4 Hydrogen</span></td>
+            <td><span class="tag tag-green">High (기본)</span></td>
+            <td><strong>51</strong></td>
+            <td>81.9</td>
+            <td>1,690+</td>
+            <td>$1.50 / $7.50 (무료 티어 제공)</td>
+            <td>$1.87 (5.3분 최속)</td>
+            <td><strong>초고속 에이전트, 실시간 질의응답</strong></td>
+          </tr>
+          <tr>
+            <td><span class="model-name provider-google">Gemini 4 Argon</span></td>
+            <td><span class="tag tag-orange">High</span></td>
+            <td><strong>50</strong></td>
+            <td>78.4</td>
+            <td>1,680+</td>
+            <td>$2.00 / $10.00 <span class="tag tag-red">12/1 $4/$20</span></td>
+            <td>$4.97 (30분 소요)</td>
+            <td><span class="tag tag-red">Hydrogen 대비 비효율 (전환 권장)</span></td>
+          </tr>
+          <tr>
+            <td><span class="model-name provider-google">Gemini 4 Argon</span></td>
+            <td><span class="tag tag-orange">Medium</span></td>
+            <td><strong>45~48</strong></td>
+            <td>78.4</td>
+            <td>1,660+</td>
+            <td>$2.00 / $10.00 <span class="tag tag-red">12/1 $4/$20</span></td>
+            <td>$3.80+</td>
+            <td>기존 아르곤 파이프라인 유지용</td>
+          </tr>
+          <tr>
+            <td><span class="model-name provider-openai">GPT-6.1 Terra</span></td>
+            <td><span class="tag tag-green">Max</span></td>
+            <td><strong>51</strong></td>
+            <td>76.6</td>
+            <td>1,678.1</td>
+            <td>$1.00 / $5.00 (캐시 $0.05)</td>
+            <td>$0.96</td>
+            <td><strong>가성비 코딩 특화 (Coding Index 76.3)</strong></td>
+          </tr>
+          <tr>
+            <td><span class="model-name provider-openai">GPT-6.1 Terra</span></td>
+            <td><span class="tag tag-green">High</span></td>
+            <td><strong>42</strong></td>
+            <td>76.6</td>
+            <td>1,650+</td>
+            <td>$1.00 / $5.00 (캐시 $0.05)</td>
+            <td>$0.26</td>
+            <td>단순 유틸리티, 백그라운드 린팅</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>2. 작업 유형별(Use-Case) 최적 모델 매핑</h2>
+    <div class="cards-grid">
+      <div class="card">
+        <div>
+          <div class="card-header">
+            <div class="card-title">🖥️ 로컬 맥 제어 & 터미널 CLI 에이전트</div>
+            <span class="tag tag-purple">1위: Sonnet 5.5</span>
+          </div>
+          <div class="card-meta">셸 명령어 실행, 시스템 환경 설정, 복잡 도구 연쇄 호출</div>
+          <div class="metric-row">
+            <span class="metric-label">Terminal-Bench 4.0</span>
+            <span class="metric-val">70.6% (독보적 1위)</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">OSWorld 2.1 (컴퓨터 제어)</span>
+            <span class="metric-val">80.1% (SOTA)</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">실무 적합성</span>
+            <span class="metric-val">오동작/루프 탈출 제어 최우수</span>
+          </div>
+        </div>
+        <div class="use-case-box">
+          <div class="use-case-title">추천 용도</div>
+          맥스튜디오/맥미니 셸 스크립트 실행, Claude Code 자동화, 시스템 진단 및 파일 오케스트레이션.
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <div class="card-header">
+            <div class="card-title">🧠 초고난도 심층 추론 & 아키텍처 설계</div>
+            <span class="tag tag-purple">1위: Carbon / Opus 5.5</span>
+          </div>
+          <div class="card-meta">복잡 알고리즘, 분산 시스템 설계, 초장문 수학/의학 논리</div>
+          <div class="metric-row">
+            <span class="metric-label">AA Intelligence Index</span>
+            <span class="metric-val">Carbon High 60 / Opus Max 59</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">HLE-Diamond (인류 난제)</span>
+            <span class="metric-val">Carbon 69.0% / Opus 67.9%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">지식 작업 (GDPval / Briefcase)</span>
+            <span class="metric-val">Opus 1846 Elo / Carbon 1610 Elo</span>
+          </div>
+        </div>
+        <div class="use-case-box">
+          <div class="use-case-title">추천 용도</div>
+          파이프라인 최상위 아키텍처 의사결정, 난해한 버그 근인 분석, 정밀 도메인 문서 검토. (비동기 처리 권장)
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <div class="card-header">
+            <div class="card-title">⚡ 대규모 범용 코딩 & 비용 밸런스</div>
+            <span class="tag tag-green">1위: GPT-6.1 Sol</span>
+          </div>
+          <div class="card-meta">저장소 전체 리팩토링, 일상 개발 피처 구현, LiveBench 최강</div>
+          <div class="metric-row">
+            <span class="metric-label">AA Intelligence (Max)</span>
+            <span class="metric-val">55 (Sonnet 5.5 Max와 동급)</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">LiveBench / SimpleBench</span>
+            <span class="metric-val">81.4 / 82.9 (최상위권)</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">태스크당 비용</span>
+            <span class="metric-val">$1.27 (Sonnet 5.5 대비 1/8)</span>
+          </div>
+        </div>
+        <div class="use-case-box">
+          <div class="use-case-title">추천 용도</div>
+          일상적인 풀스택 개발, 대용량 코드 컨텍스트 분석, 토큰을 대량 소비하는 반복 개발 태스크.
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <div class="card-header">
+            <div class="card-title">🔍 초저지연 데이터 검색 & 사실 검증</div>
+            <span class="tag tag-green">1위: Gemini 4 Hydrogen</span>
+          </div>
+          <div class="card-meta">대규모 PDF/DB 탐색, 실시간 에이전트 루프, 초저환각 작업</div>
+          <div class="metric-row">
+            <span class="metric-label">환각률 (AA-Omniscience)</span>
+            <span class="metric-val">8.0% (Sol 52%, Sonnet 43%)</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">완료 속도 (Agent Arena)</span>
+            <span class="metric-val">중앙값 5.3분 (Top 10 중 최속)</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">기본 단가 (1M)</span>
+            <span class="metric-val">$1.50 / $7.50 (무료 티어 제공)</span>
+          </div>
+        </div>
+        <div class="use-case-box">
+          <div class="use-case-title">추천 용도</div>
+          원내 행정/의료 가이드라인 RAG 검색, 외부 웹 검색 크롤링 파이프라인, 고속 데이터 정제.
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <div class="card-header">
+            <div class="card-title">🏷️ 가성비 경량 서브태스크 & 코드 보조</div>
+            <span class="tag tag-green">1위: GPT-6.1 Terra</span>
+          </div>
+          <div class="card-meta">유닛 테스트 자동 생성, CI/CD 스크립트 작성, 백그라운드 린팅</div>
+          <div class="metric-row">
+            <span class="metric-label">Coding Leaderboard Index</span>
+            <span class="metric-val">76.3 (Sol 74.1 대비 가성비 역전)</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">기본 단가 (1M)</span>
+            <span class="metric-val">$1.00 / $5.00 (Sol의 정확히 1/2)</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">태스크당 비용</span>
+            <span class="metric-val">$0.26 (High) / $0.96 (Max)</span>
+          </div>
+        </div>
+        <div class="use-case-box">
+          <div class="use-case-title">추천 용도</div>
+          백그라운드 큐에 쌓인 자잘한 작업 분산 처리, 일차적 데이터 변환 및 요약 파이프라인.
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <div class="card-header">
+            <div class="card-title">⚠️ 전환 검토 대상: Gemini 4 Argon</div>
+            <span class="tag tag-red">마이그레이션 권장</span>
+          </div>
+          <div class="card-meta">Medium / High 설정 모두 Hydrogen 및 Carbon에 포지션 잠식</div>
+          <div class="metric-row">
+            <span class="metric-label">Argon High (지능 50)</span>
+            <span class="metric-val">태스크당 $4.97 (30분 소요)</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">대안: Hydrogen Xhigh</span>
+            <span class="metric-val">지능 54, 태스크당 $3.16 (더 똑똑하고 저렴)</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">12월 1일 단가 인상</span>
+            <span class="metric-val">$2/$10 → $4/$20 (2배 폭등)</span>
+          </div>
+        </div>
+        <div class="use-case-box">
+          <div class="use-case-title">마이그레이션 전략</div>
+          일상 작업은 <strong>Hydrogen (High/Xhigh)</strong>으로 교체하고, 초고난도 작업은 <strong>Carbon (Medium)</strong>으로 상향하는 것이 비용·성능 면에서 모두 유리합니다.
+        </div>
+      </div>
+    </div>
+
+    <h2>3. 비용 함정 & 토큰 소비 패턴 분석 (실무 가이드)</h2>
+    <div class="highlight-card">
+      <div class="highlight-header">📌 1. 표면 단가와 '태스크당 실질 비용'의 괴리</div>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+        API 표면 단가는 같거나 비슷하더라도, 모델 내부의 추론(Thinking) 토큰 생성량에 따라 청구 금액이 최대 8배까지 차이 납니다.
+      </p>
+      <ul style="font-size: 13px; padding-left: 20px; color: var(--text-main);">
+        <li><strong>Claude Sonnet 5.5 Max vs GPT-6.1 Sol Max</strong>: 기본 입출력 단가는 둘 다 $2.00 / $10.00으로 완전히 동일하지만, AA Intelligence Index 완료 시 Sol은 태스크당 $1.27에 끝내는 반면 Sonnet 5.5는 내부 토큰 소모량이 막대하여 <strong>태스크당 $10.02 (약 7.9배)</strong>가 청구됩니다.</li>
+        <li><strong>Gemini 4 Carbon Medium vs Gemini 4 Argon High</strong>: 11월 기준 둘 다 표면 단가는 $2.00 / $10.00이지만, 태스크당 비용은 Carbon Medium이 $6.59, Argon High가 $4.97 수준입니다. Carbon이 약 30% 더 많은 추론 토큰을 소비하지만 지능 점수는 58 대 50으로 압도적입니다.</li>
+        <li><strong>Claude Opus 5.5 Effort 레벨의 마법</strong>: Opus 5.5는 Max로 돌리면 태스크당 $10.04에 첫 토큰 대기시간(TTFT)이 5분을 넘어가지만, <strong>Medium Effort</strong>로 설정하면 태스크당 $1.34(지능 51)에 불과해 구형 Opus 5 Max 대비 77% 저렴한 최적의 가성비를 냅니다.</li>
+      </ul>
+    </div>
+
+    <div class="highlight-card">
+      <div class="highlight-header">🚨 2. 2026년 12월 1일 Google 단가 인상 대비책</div>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+        구글 제미나이 라인업 중 <strong>Argon</strong>과 <strong>Carbon</strong>은 11월 30일 출시 특가 프로모션이 종료되며, 12월 1일부터 정가인 <strong>입력 $4.00 / 출력 $20.00</strong>으로 2배 인상됩니다.
+      </p>
+      <ul style="font-size: 13px; padding-left: 20px; color: var(--text-main);">
+        <li>반면 <strong>Gemini 4 Hydrogen</strong>은 12월 이후에도 <strong>입력 $1.50 / 출력 $7.50</strong> (캐시 $0.075) 및 무료 티어가 영구 유지됩니다.</li>
+        <li>따라서 11월 중 구축하는 자동화 파이프라인에서 기본 모델로 Argon을 지정해 둔 곳이 있다면 즉시 <strong>Hydrogen</strong> 또는 <strong>GPT-6.1 Sol</strong>로 대체해야 12월 청구서 급증을 방지할 수 있습니다.</li>
+      </ul>
+    </div>
+
+    <h2>4. 맥 스튜디오 & 오르카(Orca) 파이프라인 연계 추천 안</h2>
+    <div class="highlight-card">
+      <div class="highlight-header">🏗️ 레이어별 모델 배치 아키텍처</div>
+      <div style="font-size: 13px; line-height: 1.8;">
+        • <strong>Layer 1 (오케스트레이터 & 로컬 셸 실행)</strong>: <code>Claude Sonnet 5.5 (High/Max)</code><br>
+        &nbsp;&nbsp;→ 맥스튜디오/맥미니 로컬 환경 조작, 터미널 명령어 실행, 서브에이전트 조율 담당.<br><br>
+        • <strong>Layer 2 (주력 개발 & 복합 추론 워커)</strong>: <code>GPT-6.1 Sol (High/Max)</code><br>
+        &nbsp;&nbsp;→ 코드 작성, 대규모 리팩토링, 알고리즘 디버깅 등 토큰을 대량 소비하는 실질 작업 처리.<br><br>
+        • <strong>Layer 3 (고속 데이터 검색 & 요약 워커)</strong>: <code>Gemini 4 Hydrogen (High)</code><br>
+        &nbsp;&nbsp;→ 지메일/노션/드라이브 RAG 검색, 외부 웹 모니터링, 환각 없이 사실만 뽑아내는 저지연 작업.<br><br>
+        • <strong>Layer 4 (경량 백그라운드 큐 & 린팅)</strong>: <code>GPT-6.1 Terra (Medium/High)</code><br>
+        &nbsp;&nbsp;→ 윈도우 PC 및 백그라운드 오르카 큐에서 단순 코드 변환, 포맷팅, 유닛 테스트 자동화.<br><br>
+        • <strong>Layer 5 (최종 검증 & 아키텍처 감사 - 비동기)</strong>: <code>Gemini 4 Carbon (Medium)</code> 또는 <code>Claude Opus 5.5 (Medium/High)</code><br>
+        &nbsp;&nbsp;→ 주간 코드 감사, 보안 취약점 점검, 주요 배포 전 최종 아키텍처 무결성 검증.
+      </div>
+    </div>
+
+    <div class="footer">
+      데이터 출처: Artificial Analysis v5.0, ArtificialWatch Index (models.dev 2026.11 실측), LMArena, LiveBench, Vals AI, Anthropic·OpenAI·Google 공식 API 가격표.<br>
+      제작: 정지환 님의 개인 비서 바클
+    </div>
+  </div>
+</body>
+</html>
